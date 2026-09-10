@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Termin buchen – Studie »Defekte spüren«</title>
+<meta name="description" content="Termin für die Studie »Defekte spüren« der TH Köln buchen. Dauer ca. 35 Minuten.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   HIER ANPASSEN – sonst nichts
+   ═══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  // URL der Apps-Script-Web-App (endet auf /exec). Siehe README.
+  // Solange leer: Testmodus, alles frei, es wird nichts gespeichert.
+  apiUrl: "",
+
+  // Kontakt für Rückfragen, Absagen und Widerruf (DSGVO Art. 13)
+  kontaktName:  "Livius Kahlo",
+  kontaktMail:  "BITTE-EINTRAGEN@smail.th-koeln.de",
+
+  treffpunkt:   "Haupteingang der TH Köln, Campus Gummersbach",
+  treffpunktZusatz: "Wir holen Sie dort ab.",
+
+  ablaufMin: 35,   // tatsächliche Dauer für die Teilnehmenden
+  blockMin:  60,   // reservierte Zeit inkl. Vor- und Nachbereitung
+
+  tage: [
+    { datum: "2026-09-14", wochentag: "Montag",   anzeige: "14. September",
+      slots: ["10:00", "11:00", "12:00", "13:30", "14:30", "15:30"] },
+    { datum: "2026-09-15", wochentag: "Dienstag", anzeige: "15. September",
+      slots: ["10:00", "11:00", "12:00", "13:30", "14:30", "15:30"] },
+    { datum: "2026-09-16", wochentag: "Mittwoch", anzeige: "16. September",
+      slots: ["10:00", "11:00", "12:00", "13:30", "14:30", "15:30"] }
+  ]
+};
+/* ═══════════════════════════════════════════════════════════════ */
+</script>
+
+<style>
+:root{
+  --bg:#DFE3DE;
+  --surface:#FBFCFA;
+  --ink:#171A19;
+  --muted:#6A716B;
+  --line:#C6CCC5;
+  --accent:#1D4E3B;
+  --accent-soft:#E3EDE7;
+  --gone:#CFD4CE;
+  --warn:#8A3B1E;
+  --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Bricolage Grotesque",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-weight:500;
+  font-size:17px;
+  line-height:1.5;
+  padding:0 20px calc(48px + env(safe-area-inset-bottom));
+}
+.wrap{max-width:32rem;margin:0 auto}
+
+/* ── Kopf ── */
+header{padding:34px 0 22px}
+h1{
+  font-size:clamp(2.1rem,9vw,2.9rem);
+  font-weight:700;
+  line-height:.98;
+  letter-spacing:-.035em;
+  margin:0 0 12px;
+}
+h1 em{display:block;font-style:normal;color:var(--accent)}
+.lede{margin:0;max-width:26rem;color:var(--muted)}
+
+.facts{
+  margin:20px 0 0;padding:0;list-style:none;
+  border-top:1px solid var(--line);
+}
+.facts li{
+  display:flex;gap:14px;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid var(--line);
+  font-size:.94rem;
+}
+.facts b{flex:0 0 5.6rem;font-weight:700;color:var(--muted)}
+.facts span{flex:1}
+
+/* ── Tage & Slots ── */
+h2{
+  font-size:1.15rem;font-weight:700;letter-spacing:-.02em;
+  margin:30px 0 10px;display:flex;align-items:baseline;gap:.5rem;
+}
+h2 small{font-weight:500;font-size:.95rem;color:var(--muted)}
+.slots{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+
+.slot{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:15px 18px;
+  font:inherit;font-weight:700;font-size:1.12rem;letter-spacing:-.01em;
+  color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 2px 0 var(--line);
+  cursor:pointer;text-align:left;
+  transition:transform .08s ease, box-shadow .08s ease, background .15s ease;
+}
+.slot .state{font-size:.86rem;font-weight:500;color:var(--accent)}
+.slot:hover{background:var(--accent-soft)}
+.slot:active{transform:translateY(2px);box-shadow:0 0 0 var(--line)}
+.slot:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.slot[disabled]{
+  background:transparent;color:var(--gone);border-color:var(--gone);
+  box-shadow:none;cursor:default;
+}
+.slot[disabled] .state{color:var(--gone)}
+.slot[disabled]:hover{background:transparent}
+
+.status{
+  margin:24px 0 0;padding:14px 16px;border-radius:var(--r);
+  background:var(--surface);border:1px solid var(--line);
+  font-size:.94rem;color:var(--muted);
+}
+.status.err{border-color:var(--warn);color:var(--warn)}
+
+footer{
+  margin-top:34px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:.82rem;line-height:1.6;color:var(--muted);
+}
+footer a{color:var(--accent)}
+footer p{margin:0 0 10px}
+
+/* ── Formular-Panel ── */
+dialog{
+  border:0;padding:0;background:transparent;color:var(--ink);
+  width:100%;max-width:32rem;margin:auto auto 0;
+}
+dialog::backdrop{background:rgba(23,26,25,.55)}
+@media (min-width:520px){ dialog{margin:auto} }
+.panel{
+  background:var(--surface);
+  border-radius:var(--r) var(--r) 0 0;
+  padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+  animation:rise .2s ease-out;
+}
+@media (min-width:520px){ .panel{border-radius:var(--r)} }
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .panel{animation:none}
+  .slot{transition:none}
+}
+.panel h3{
+  font-size:1.5rem;font-weight:700;letter-spacing:-.03em;
+  margin:0 0 4px;line-height:1.1;
+}
+.panel .sub{margin:0 0 20px;color:var(--muted);font-size:.94rem}
+
+label{display:block;margin:0 0 14px}
+label .lab{display:block;font-size:.88rem;font-weight:700;margin-bottom:5px}
+input[type=text],input[type=email]{
+  width:100%;font:inherit;font-weight:500;font-size:1.05rem;
+  padding:13px 14px;color:var(--ink);background:#fff;
+  border:1px solid var(--line);border-radius:10px;
+}
+input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:.86rem;color:var(--muted);margin:0 0 18px}
+.check input{width:20px;height:20px;flex:0 0 20px;margin:1px 0 0;accent-color:var(--accent)}
+.hp{position:absolute;left:-9999px}
+
+.btn{
+  width:100%;font:inherit;font-weight:700;font-size:1.08rem;
+  padding:16px;border-radius:var(--r);border:1px solid var(--accent);
+  background:var(--accent);color:#fff;cursor:pointer;
+}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.btn[disabled]{opacity:.55;cursor:progress}
+.btn.ghost{background:transparent;color:var(--accent);margin-top:10px}
+.formerr{margin:0 0 14px;color:var(--warn);font-size:.9rem}
+.hidden{display:none}
+
+/* ── Bestätigung ── */
+.done .mark{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-size:1.5rem;font-weight:700;
+  margin:0 0 14px;
+}
+.recap{
+  margin:0 0 18px;padding:0;list-style:none;
+  border-top:1px solid var(--line);
+}
+.recap li{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.94rem}
+.recap b{flex:0 0 6.4rem;font-weight:700;color:var(--muted)}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Defekte<em>spüren</em></h1>
+    <p class="lede">Sie tragen ein kleines Gerät am Finger und spüren verschiedene Reize. Danach ein kurzer Fragebogen. Mehr ist es nicht.</p>
+    <ul class="facts">
+      <li><b>Dauer</b><span id="f-dauer"></span></li>
+      <li><b>Ort</b><span id="f-ort"></span></li>
+      <li><b>Mitbringen</b><span>Nichts. Vorkenntnisse sind nicht nötig.</span></li>
+    </ul>
+  </header>
+
+  <main>
+    <div id="status" class="status">Freie Termine werden geladen …</div>
+    <div id="days"></div>
+  </main>
+
+  <footer>
+    <p><b>Voraussetzung:</b> keine Verletzungen oder Einschränkungen des Tastsinns an der Hand, mindestens 18 Jahre.</p>
+    <p><b>Datenschutz:</b> Name und E-Mail dienen ausschließlich der Terminabstimmung und werden nach der Erhebung gelöscht. Die Studiendaten selbst werden anonym erhoben. Die Teilnahme ist freiwillig und kann jederzeit ohne Angabe von Gründen abgebrochen werden.</p>
+    <p id="f-kontakt"></p>
+    <p>Studie »Defekte spüren« · Haptic AR in Industry 4.0 · TH Köln, Medieninformatik<br>
+       Mahyar Aghazadeh, Livius Kahlo, Joash Koshan · Betreuung: Dennis Dubbert, Matthias Böhmer</p>
+  </footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="panel">
+
+    <form id="form" novalidate>
+      <h3 id="dlg-title">Termin sichern</h3>
+      <p class="sub" id="dlg-sub"></p>
+      <p class="formerr hidden" id="formerr"></p>
+
+      <label>
+        <span class="lab">Name</span>
+        <input type="text" id="name" name="name" autocomplete="name" enterkeyhint="next" required>
+      </label>
+      <label>
+        <span class="lab">E-Mail</span>
+        <input type="email" id="mail" name="mail" autocomplete="email" inputmode="email" enterkeyhint="done" required>
+      </label>
+      <input type="text" class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <label class="check">
+        <input type="checkbox" id="ok" required>
+        <span>Ich bin einverstanden, dass Name und E-Mail für die Terminabstimmung gespeichert und danach gelöscht werden.</span>
+      </label>
+
+      <button class="btn" id="send" type="submit">Termin buchen</button>
+      <button class="btn ghost" type="button" id="cancel">Zurück</button>
+    </form>
+
+    <div id="done" class="done hidden">
+      <div class="mark" aria-hidden="true">✓</div>
+      <h3>Termin steht</h3>
+      <p class="sub" id="done-sub"></p>
+      <ul class="recap" id="recap"></ul>
+      <button class="btn" id="ics" type="button">In den Kalender eintragen</button>
+      <button class="btn ghost" id="close2" type="button">Schließen</button>
+    </div>
+
+  </div>
+</dialog>
+
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const demo = !CONFIG.apiUrl;
+  let belegt = new Set();
+  let aktiv = null;
+
+  /* Kopfdaten */
+  $("#f-dauer").textContent =
+    `ca. ${CONFIG.ablaufMin} Minuten. Wir reservieren ${CONFIG.blockMin} Minuten für Sie.`;
+  $("#f-ort").textContent = CONFIG.treffpunkt + " " + CONFIG.treffpunktZusatz;
+  $("#f-kontakt").innerHTML =
+    `<b>Fragen oder absagen?</b> ${CONFIG.kontaktName}, ` +
+    `<a href="mailto:${CONFIG.kontaktMail}">${CONFIG.kontaktMail}</a>`;
+
+  /* ── Verfügbarkeit über JSONP lesen (kein CORS-Ärger) ── */
+  function jsonp(params) {
+    return new Promise((res, rej) => {
+      const cb = "_cb" + Math.random().toString(36).slice(2);
+      const s = document.createElement("script");
+      const t = setTimeout(() => { cleanup(); rej(new Error("timeout")); }, 12000);
+      function cleanup(){ clearTimeout(t); delete window[cb]; s.remove(); }
+      window[cb] = d => { cleanup(); res(d); };
+      s.onerror = () => { cleanup(); rej(new Error("network")); };
+      s.src = CONFIG.apiUrl + "?callback=" + cb + "&" + params + "&t=" + Date.now();
+      document.body.appendChild(s);
+    });
+  }
+
+  async function ladeBelegt() {
+    if (demo) return new Set();
+    const d = await jsonp("action=list");
+    return new Set(d.belegt || []);
+  }
+
+  /* ── Rendern ── */
+  const id = (datum, zeit) => datum + "|" + zeit;
+
+  function render() {
+    const days = $("#days");
+    days.innerHTML = "";
+    let frei = 0;
+
+    CONFIG.tage.forEach(tag => {
+      const h = document.createElement("h2");
+      h.innerHTML = `${tag.wochentag} <small>${tag.anzeige}</small>`;
+      const ul = document.createElement("ul");
+      ul.className = "slots";
+
+      tag.slots.forEach(zeit => {
+        const key = id(tag.datum, zeit);
+        const weg = belegt.has(key);
+        if (!weg) frei++;
+        const li = document.createElement("li");
+        const b = document.createElement("button");
+        b.className = "slot";
+        b.type = "button";
+        b.dataset.key = key;
+        b.disabled = weg;
+        b.innerHTML = `<span>${zeit} Uhr</span><span class="state">${weg ? "belegt" : "frei"}</span>`;
+        b.setAttribute("aria-label",
+          `${zeit} Uhr am ${tag.wochentag}, ${tag.anzeige}, ${weg ? "belegt" : "frei – jetzt buchen"}`);
+        if (!weg) b.addEventListener("click", () => oeffne(tag, zeit));
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+
+      days.appendChild(h);
+      days.appendChild(ul);
+    });
+
+    const st = $("#status");
+    st.classList.remove("err");
+    if (frei === 0) {
+      st.textContent = "Alle Termine sind vergeben. Schreiben Sie uns – wir melden uns, falls etwas frei wird.";
+    } else {
+      st.textContent = demo
+        ? "Testmodus: Es wird noch nichts gespeichert (apiUrl fehlt)."
+        : `Noch ${frei} ${frei === 1 ? "freier Termin" : "freie Termine"}. Tippen Sie auf eine Uhrzeit.`;
+    }
+  }
+
+  /* ── Dialog ── */
+  const dlg = $("#dlg");
+
+  function oeffne(tag, zeit) {
+    aktiv = { tag, zeit, key: id(tag.datum, zeit) };
+    $("#form").classList.remove("hidden");
+    $("#done").classList.add("hidden");
+    $("#formerr").classList.add("hidden");
+    $("#dlg-sub").textContent = `${tag.wochentag}, ${tag.anzeige}, ${zeit} Uhr`;
+    dlg.showModal();
+    setTimeout(() => $("#name").focus(), 60);
+  }
+
+  $("#cancel").addEventListener("click", () => dlg.close());
+  $("#close2").addEventListener("click", () => dlg.close());
+
+  function fehler(text) {
+    const e = $("#formerr");
+    e.textContent = text;
+    e.classList.remove("hidden");
+  }
+
+  $("#form").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const name = $("#name").value.trim();
+    const mail = $("#mail").value.trim();
+
+    if (name.length < 2) return fehler("Bitte tragen Sie Ihren Namen ein.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return fehler("Diese E-Mail-Adresse sieht nicht vollständig aus.");
+    if (!$("#ok").checked) return fehler("Bitte bestätigen Sie die Einwilligung.");
+    if ($("#hp").value) return;
+
+    const btn = $("#send");
+    btn.disabled = true;
+    btn.textContent = "Wird gebucht …";
+    $("#formerr").classList.add("hidden");
+
+    if (demo) { belegt.add(aktiv.key); render(); zeigeErfolg(name, mail); btn.disabled = false; btn.textContent = "Termin buchen"; return; }
+
+    try {
+      const r = await fetch(CONFIG.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "book", slot: aktiv.key, name, mail })
+      });
+      const d = await r.json();
+      if (d.ok) { belegt = new Set(d.belegt || []); render(); zeigeErfolg(name, mail); }
+      else if (d.error === "taken") { belegt = new Set(d.belegt || []); render(); dlg.close(); meldung("Dieser Termin war gerade schneller weg. Bitte wählen Sie einen anderen."); }
+      else fehler("Das hat nicht geklappt. Bitte noch einmal versuchen oder uns eine Mail schreiben.");
+    } catch (e) {
+      // Antwort nicht lesbar (CORS o. ä.) – prüfen, ob die Buchung trotzdem ankam
+      await new Promise(r => setTimeout(r, 1800));
+      try {
+        const d = await jsonp("action=list");
+        belegt = new Set(d.belegt || []);
+        if (belegt.has(aktiv.key)) { render(); zeigeErfolg(name, mail); }
+        else { render(); fehler("Keine Verbindung. Bitte noch einmal versuchen."); }
+      } catch (_) {
+        fehler("Keine Verbindung. Bitte noch einmal versuchen oder uns eine Mail schreiben.");
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Termin buchen";
+    }
+  });
+
+  function meldung(text) {
+    const st = $("#status");
+    st.textContent = text;
+    st.classList.add("err");
+    st.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function zeigeErfolg(name, mail) {
+    $("#form").classList.add("hidden");
+    $("#done").classList.remove("hidden");
+    $("#done-sub").textContent = demo
+      ? "Testmodus – es wurde nichts gespeichert."
+      : `Eine Bestätigung ist an ${mail} unterwegs.`;
+    $("#recap").innerHTML = `
+      <li><b>Wann</b><span>${aktiv.tag.wochentag}, ${aktiv.tag.anzeige}, ${aktiv.zeit} Uhr</span></li>
+      <li><b>Wo</b><span>${CONFIG.treffpunkt}. ${CONFIG.treffpunktZusatz}</span></li>
+      <li><b>Dauer</b><span>ca. ${CONFIG.ablaufMin} Minuten</span></li>
+      <li><b>Name</b><span>${name.replace(/[<>&]/g, "")}</span></li>`;
+  }
+
+  /* ── Kalenderdatei ── */
+  $("#ics").addEventListener("click", () => {
+    const [Y, M, D] = aktiv.tag.datum.split("-").map(Number);
+    const [h, m] = aktiv.zeit.split(":").map(Number);
+    const start = new Date(Y, M - 1, D, h, m);
+    const ende = new Date(start.getTime() + CONFIG.ablaufMin * 60000);
+    const z = n => String(n).padStart(2, "0");
+    const f = d => `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}T${z(d.getHours())}${z(d.getMinutes())}00`;
+    const ics = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//TH Koeln//Defekte spueren//DE",
+      "BEGIN:VEVENT",
+      "UID:" + aktiv.key.replace(/\W/g, "") + "@th-koeln",
+      "DTSTAMP:" + f(new Date()),
+      "DTSTART;TZID=Europe/Berlin:" + f(start),
+      "DTEND;TZID=Europe/Berlin:" + f(ende),
+      "SUMMARY:Studie Defekte spüren – TH Köln",
+      "LOCATION:" + CONFIG.treffpunkt,
+      "DESCRIPTION:" + CONFIG.treffpunktZusatz + " Kontakt: " + CONFIG.kontaktMail,
+      "BEGIN:VALARM", "TRIGGER:-PT60M", "ACTION:DISPLAY",
+      "DESCRIPTION:Studie Defekte spüren in einer Stunde", "END:VALARM",
+      "END:VEVENT", "END:VCALENDAR"
+    ].join("\r\n");
+    const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = "studie-termin.ics";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  });
+
+  /* ── Start ── */
+  (async () => {
+    try { belegt = await ladeBelegt(); render(); }
+    catch (e) {
+      belegt = new Set();
+      render();
+      meldung("Die freien Termine ließen sich nicht laden. Bitte Seite neu laden.");
+    }
+  })();
+
+  // Beim Zurückkehren zur Seite Verfügbarkeit auffrischen
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState === "visible" && !demo && !dlg.open) {
+      try { belegt = await ladeBelegt(); render(); } catch (_) {}
+    }
+  });
+})();
+</script>
+</body>
+</html>
