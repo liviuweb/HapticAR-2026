@@ -32,25 +32,25 @@ const CONFIG = {
 
   tage: [
     { datum: "2026-09-14", wochentag: "Montag", anzeige: "14. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-15", wochentag: "Dienstag", anzeige: "15. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-16", wochentag: "Mittwoch", anzeige: "16. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-17", wochentag: "Donnerstag", anzeige: "17. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-18", wochentag: "Freitag", anzeige: "18. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-21", wochentag: "Montag", anzeige: "21. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-22", wochentag: "Dienstag", anzeige: "22. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-23", wochentag: "Mittwoch", anzeige: "23. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-24", wochentag: "Donnerstag", anzeige: "24. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] },
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] },
     { datum: "2026-09-25", wochentag: "Freitag", anzeige: "25. September",
-      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"] }
+      slots: ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"] }
   ]
 };
 /* ═══════════════════════════════════════════════════════════════ */
@@ -172,6 +172,8 @@ footer a{color:var(--accent)}
 footer p{margin:0 0 10px}
 
 /* ── Formular-Panel ── */
+dialog.fallback{position:fixed;inset:0;z-index:99;display:flex;
+  align-items:flex-end;background:rgba(23,26,25,.55);overflow:auto}
 dialog{
   border:0;padding:0;background:transparent;color:var(--ink);
   width:100%;max-width:32rem;margin:auto auto 0;
@@ -268,7 +270,6 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
     <form id="form" novalidate>
       <h3 id="dlg-title">Termin sichern</h3>
       <p class="sub" id="dlg-sub"></p>
-      <p class="formerr hidden" id="formerr"></p>
 
       <label>
         <span class="lab">Name</span>
@@ -278,13 +279,14 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
         <span class="lab">E-Mail</span>
         <input type="email" id="mail" name="mail" autocomplete="email" inputmode="email" enterkeyhint="done" required>
       </label>
-      <input type="text" class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input type="checkbox" class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <label class="check">
         <input type="checkbox" id="ok" required>
         <span>Ich bin einverstanden, dass Name und E-Mail für die Terminabstimmung gespeichert und danach gelöscht werden.</span>
       </label>
 
+      <p class="formerr hidden" id="formerr" role="alert"></p>
       <button class="btn" id="send" type="submit">Termin buchen</button>
       <button class="btn ghost" type="button" id="cancel">Zurück</button>
     </form>
@@ -306,7 +308,8 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
   "use strict";
   const $ = s => document.querySelector(s);
   const demo = !CONFIG.apiUrl;
-  let belegt = new Set();
+  let belegt = new Set();      // gebucht oder von uns gesperrt
+  let gesperrt = new Set();    // nur gesperrt – wird anders beschriftet
   let aktiv = null;
 
   /* Kopfdaten */
@@ -334,6 +337,7 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
   async function ladeBelegt() {
     if (demo) return new Set();
     const d = await jsonp("action=list");
+    gesperrt = new Set(d.gesperrt || []);
     return new Set(d.belegt || []);
   }
 
@@ -368,9 +372,10 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
         b.type = "button";
         b.dataset.key = key;
         b.disabled = weg;
-        b.innerHTML = `<span>${zeit} Uhr</span><span class="state">${weg ? "belegt" : "frei"}</span>`;
+        const text = !weg ? "frei" : (gesperrt.has(key) ? "nicht verfügbar" : "belegt");
+        b.innerHTML = `<span>${zeit} Uhr</span><span class="state">${text}</span>`;
         b.setAttribute("aria-label",
-          `${zeit} Uhr am ${tag.wochentag}, ${tag.anzeige}, ${weg ? "belegt" : "frei – jetzt buchen"}`);
+          `${zeit} Uhr am ${tag.wochentag}, ${tag.anzeige}, ${weg ? text : "frei – jetzt buchen"}`);
         if (!weg) b.addEventListener("click", () => oeffne(tag, zeit));
         li.appendChild(b);
         ul.appendChild(li);
@@ -413,35 +418,48 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
     $("#done").classList.add("hidden");
     $("#formerr").classList.add("hidden");
     $("#dlg-sub").textContent = `${tag.wochentag}, ${tag.anzeige}, ${zeit} Uhr`;
-    dlg.showModal();
+    if (typeof dlg.showModal === "function") dlg.showModal();
+    else { dlg.setAttribute("open", ""); dlg.classList.add("fallback"); }
     setTimeout(() => $("#name").focus(), 60);
   }
 
-  $("#cancel").addEventListener("click", () => dlg.close());
-  $("#close2").addEventListener("click", () => dlg.close());
+  const zu = () => { if (typeof dlg.close === "function") dlg.close();
+                     else { dlg.removeAttribute("open"); dlg.classList.remove("fallback"); } };
+  $("#cancel").addEventListener("click", zu);
+  $("#close2").addEventListener("click", zu);
 
-  function fehler(text) {
+  function fehler(text, feld) {
     const e = $("#formerr");
     e.textContent = text;
     e.classList.remove("hidden");
+    e.scrollIntoView({ block: "nearest" });
+    if (feld) $(feld).focus();
   }
 
-  $("#form").addEventListener("submit", async ev => {
-    ev.preventDefault();
+  // Absenden UND Klick: In manchen Android-Browsern löst ein Knopf im Dialog
+  // kein submit-Ereignis aus. Die Sperre verhindert doppelte Ausführung.
+  let laeuft = false;
+  $("#form").addEventListener("submit", ev => { ev.preventDefault(); buchen(); });
+  $("#send").addEventListener("click", ev => { ev.preventDefault(); buchen(); });
+
+  async function buchen() {
+    if (laeuft) return;
     const name = $("#name").value.trim();
     const mail = $("#mail").value.trim();
 
-    if (name.length < 2) return fehler("Bitte tragen Sie Ihren Namen ein.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return fehler("Diese E-Mail-Adresse sieht nicht vollständig aus.");
-    if (!$("#ok").checked) return fehler("Bitte bestätigen Sie die Einwilligung.");
-    if ($("#hp").value) return;
+    if (name.length < 2) return fehler("Bitte tragen Sie Ihren Namen ein.", "#name");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return fehler("Diese E-Mail-Adresse sieht nicht vollständig aus.", "#mail");
+    if (!$("#ok").checked) return fehler("Bitte bestätigen Sie die Einwilligung.", "#ok");
+    if ($("#hp").checked) return fehler("Bitte laden Sie die Seite neu und versuchen es erneut.");
 
+    laeuft = true;
     const btn = $("#send");
     btn.disabled = true;
     btn.textContent = "Wird gebucht …";
     $("#formerr").classList.add("hidden");
 
-    if (demo) { belegt.add(aktiv.key); render(); zeigeErfolg(name, mail); btn.disabled = false; btn.textContent = "Termin buchen"; return; }
+    if (demo) { belegt.add(aktiv.key); render(); zeigeErfolg(name, mail);
+                laeuft = false; btn.disabled = false; btn.textContent = "Termin buchen"; return; }
 
     const senden = () => fetch(CONFIG.apiUrl, {
       method: "POST",
@@ -461,12 +479,15 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
       }
 
       if (d.ok) {
-        belegt = new Set(d.belegt || []); render(); zeigeErfolg(name, mail);
+        belegt = new Set(d.belegt || []); gesperrt = new Set(d.gesperrt || gesperrt); render(); zeigeErfolg(name, mail);
       } else if (d.error === "taken") {
-        belegt = new Set(d.belegt || []); render(); dlg.close();
+        belegt = new Set(d.belegt || []); gesperrt = new Set(d.gesperrt || gesperrt); render(); zu();
         meldung("Dieser Termin war gerade schneller weg. Bitte wählen Sie einen anderen.");
       } else if (d.error === "double") {
         fehler("Mit dieser E-Mail-Adresse ist bereits ein Termin gebucht. Schreiben Sie uns, wenn Sie ihn verlegen möchten.");
+      } else if (d.error === "blocked") {
+        belegt = new Set(d.belegt || []); render(); zu();
+        meldung("Dieser Termin steht leider nicht mehr zur Verfügung. Bitte wählen Sie einen anderen.");
       } else if (d.error === "busy") {
         fehler("Gerade bucht jemand anderes. Bitte noch einmal antippen.");
       } else {
@@ -477,7 +498,7 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
       // trotzdem angekommen ist.
       try {
         const d = await jsonp("action=list");
-        belegt = new Set(d.belegt || []);
+        belegt = new Set(d.belegt || []); gesperrt = new Set(d.gesperrt || gesperrt);
         render();
         if (belegt.has(aktiv.key)) zeigeErfolg(name, mail);
         else fehler("Keine Verbindung. Bitte noch einmal versuchen.");
@@ -485,10 +506,11 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
         fehler("Keine Verbindung. Bitte noch einmal versuchen oder uns eine Mail schreiben.");
       }
     } finally {
+      laeuft = false;
       btn.disabled = false;
       btn.textContent = "Termin buchen";
     }
-  });
+  }
 
   function meldung(text) {
     const st = $("#status");
